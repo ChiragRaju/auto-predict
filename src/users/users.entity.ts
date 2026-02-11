@@ -10,11 +10,11 @@ import {
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  id?: number;
   @Column()
-  email: string;
+  email?: string;
   @Column()
-  password: string;
+  password?: string;
 
   //these are lifecycle hooks that will be called after the corresponding events occur on the entity. They are useful for logging, auditing, or performing additional actions when an entity is inserted, updated, or removed from the database.
   @AfterInsert()
