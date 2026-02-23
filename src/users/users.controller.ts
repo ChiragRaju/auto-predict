@@ -9,6 +9,7 @@ import {
   Query,
   NotFoundException,
   UseInterceptors,
+  Session,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UsersService } from './users.service';
@@ -20,8 +21,16 @@ import { AuthService } from './auth.service';
 @Controller('auth')
 @Serialize(UserDto)
 export class UsersController {
-  constructor(private usersService: UsersService,private authService:AuthService) {}
+  constructor(
+    private usersService: UsersService,
+    private authService: AuthService,
+  ) {}
 
+  @Get('/whoami')
+  whoAmI(@Session() session: any) {
+    console.log(session);
+    return this.usersService.findOne(session.userId);
+  }
   //@UseInterceptors(new SerializeInterceptor(UserDto))
   //@Serialize(UserDto)
   @Get('/:id')
@@ -50,14 +59,21 @@ export class UsersController {
   }
 
   @Post('/signup')
-  createUser(@Body() body: CreateUserDto) {
-   return this.authService.SignUp(body.email, body.password);
-
-   // return this.usersService.create(body.email, body.password);
+  async createUser(@Body() body: CreateUserDto, @Session() session: any) {
+    const user = await this.authService.SignUp(body.email, body.password);
+    session.userId = user.id;
+    return user;
   }
 
   @Post('/signin')
-  SignIn(@Body() body: CreateUserDto) {
-    return this.authService.SignIn(body.email, body.password);
+  async SignIn(@Body() body: CreateUserDto, @Session() session: any) {
+    const user = await this.authService.SignIn(body.email, body.password);
+    session.userId = user.id;
+    return user;
+  }
+
+  @Post('/signout')
+  async Signout(@Session() session: any) {
+    session.userId = null;
   }
 }
